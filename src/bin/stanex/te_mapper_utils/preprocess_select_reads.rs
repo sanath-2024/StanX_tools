@@ -127,3 +127,114 @@ impl fmt::Display for TeAlignment {
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::fs::File;
+    use std::io::BufReader;
+    use std::io::BufRead;
+
+    use std::sync::Arc;
+
+    #[test]
+    fn test_cigar_string_parsing() {
+        // test the creation of, m_size, s_size, is_sm, and is_start
+
+        // read in the transposons
+        let mut te_aligned_reader = BufReader::with_capacity(
+            65_536,
+            File::open("test/te_aligned.sam").unwrap(),
+        );
+
+        // read the file line by line
+        let mut te_aligned_read;
+
+        // first, get rid of comments (comments in the SAM file start with "@SQ")
+        // and ignore the last comment line (starts with "@PG")
+        let mut transposons: HashMap<String, u64> = HashMap::new();
+        loop {
+            te_aligned_read = String::new();
+            te_aligned_reader
+                .read_line(&mut te_aligned_read)
+                .unwrap();
+            if te_aligned_read.chars().nth(1).unwrap() == 'P' {
+                break;
+            } else {
+                create_transposon(&te_aligned_read, &mut transposons);
+            }
+        }
+
+        let transposons_arc = Arc::new(transposons);
+
+        // use actual inputs from the file
+        // 54S34M62S is invalid
+        let input0 = "I_MADE_UP_THIS_READ	0	roo#LTR/Bel-Pao	1	60	54S34M62S	*	0	0	CCTGGCTTGGGGCGGCCGCGGGTTCGTGGCGTCGGCGCTATTTGTTCCTTGGCAGTCGGCTCTTCCTATCATTGTGAAGCAAAATTCATATGGCATTGTCTCCTAAAACTTTTCTATAGTGCCGTATTTCTATGGCGCCCACTGTGAAGN	--F-7-F7----A--F7---------7--77----J7<---77--7---A--7-7-----<A7--7F<7FAAJA7---F-<-F7<<-<----<<--<---<--F7-F-F-<JFJAF7<JFJJAJFJFFJAJJJJJJJJJJJJFJJF<AA#	NM:i:0	MD:Z:34	AS:i:34	XS:i:0";
+        assert!(TeAlignment::create(String::from(input0), &transposons_arc).is_none());
+
+        // case 1: +/+ match at start
+        // flag 0 (+/+), 119S31M => the read aligned to the top strand of the transposon, and the match was at the beginning of the transposon:
+        //  match ... ---->
+        //              -------->
+        //              <--------
+        // expected: m_size = 31, s_size = 119, is_sm = true, is_start = true
+        let input1 = "2L_Read_976816	0	roo#LTR/Bel-Pao	1	0	119S31M	*	0	0	ACATATGATATAAATAGCATTAAATGTTGAGTATAACGTGTCAAAGAATCCTTGGGATGAATAATAACGGAGGAAGCTGTAAATATAACCAGATTAGAAACCTATTCCTATAAACTCTCTGTTCACACATGAACACGAATATATTTAAAG	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	NM:i:0	MD:Z:31	AS:i:31	XS:i:31	XA:Z:roo#LTR/Bel-Pao,+8665,119S31M,0;";
+        let result1 = TeAlignment::create(String::from(input1), &transposons_arc);
+        assert!(result1.is_some());
+        if let Some(res) = result1 {
+            assert_eq!(res.m_size, 31);
+            assert_eq!(res.s_size, 119);
+            assert!(res.is_sm);
+            assert!(res.is_start);
+        }
+
+        // case 2: +/+ match at end
+        // flag 0 (+/+), 144M6S => the read aligned to the top strand of the transposon, and the match was at the end of the transposon
+        //           match ... ---->
+        //              -------->
+        //              <--------
+        // expected: m_size = 144, s_size = 6, is_sm = false, is_start = false
+        let input2 = "2L_Read_977219	0	roo#LTR/Bel-Pao	8949	0	144M6S	*	0	0	GGACTATTTACGTAGGCCTCTGCGTAGGCCATTTACTTTAAGATGCGATTCTCATGTCACCTATTTAAACCGAAGATATTTCCAAATAAAACCAGTTTCTTACAAAAACTCAACGAGTAAAGTCTTCTTATTTGGGATTTTACATTTGGT	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	NM:i:2	MD:Z:91T36C15	AS:i:134	XS:i:133	XA:Z:roo#LTR/Bel-Pao,+285,95M1D55M,3;";
+        let result2 = TeAlignment::create(String::from(input2), &transposons_arc);
+        assert!(result2.is_some());
+        if let Some(res) = result2 {
+            assert_eq!(res.m_size, 144);
+            assert_eq!(res.s_size, 6);
+            assert!(!res.is_sm);
+            assert!(!res.is_start);
+        }
+
+        // case 3: +/- match at start
+        // flag 16 (+/-), 9S141M => the read aligned to the bottom strand of the transposon, and the match was at the beginning of the transposon:
+        //              -------->
+        //              <--------
+        // match ... <----
+        // expected: m_size = 141, s_size = 9, is_sm = true, is_start = true
+        let input3 = "2L_Read_355243	16	blood#LTR/Gypsy	1	0	9S141M	*	0	0	GTGGCGAATTGTAGTATGTGCATATATCGAGGGTATACTGTACCTATAAGTACACAGCAACACTTAGTTGCATTGCATAAATAAATGTCTCAAGTGAGCGTGATATAAGATCACCCATTTATGCTTTAAGCTAAGTCAGCATCCCCACGC	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	NM:i:1	MD:Z:26C114	AS:i:136	XS:i:136	XA:Z:blood#LTR/Gypsy,-7012,9S141M,1;";
+        let result3 = TeAlignment::create(String::from(input3), &transposons_arc);
+        assert!(result3.is_some());
+        if let Some(res) = result3 {
+            assert_eq!(res.m_size, 141);
+            assert_eq!(res.s_size, 9);
+            assert!(res.is_sm);
+            assert!(res.is_start);
+        }
+
+        // case 4: +/- match at end
+        // flag 16 (+/-), 31M119S => the read aligned to the top strand of the transposon, and the match was at the end of the transposon
+        //              -------->
+        //              <--------
+        //          match ... <----
+        // expected: m_size = 31, s_size = 119, is_sm = false, is_start = false
+        let input4 = "2L_Read_347822	16	blood#LTR/Gypsy	7380	0	31M119S	*	0	0	CTCAATTGGTGGCATATATTGGTTTATTACAGAATATCGAATCACTGATTCGGGATGTGAGAGTCACAATTTATTCCGCGATATCAGTTAAAAAAAATCTTCAAGACTTAAGATTTGACCGACAAAGAACATTTCTACGTGTTGGCCAAG	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	NM:i:0	MD:Z:31	AS:i:31	XS:i:31	XA:Z:blood#LTR/Gypsy,-368,31M119S,0;";
+        let result4 = TeAlignment::create(String::from(input4), &transposons_arc);
+        assert!(result4.is_some());
+        if let Some(res) = result4 {
+            assert_eq!(res.m_size, 31);
+            assert_eq!(res.s_size, 119);
+            assert!(!res.is_sm);
+            assert!(!res.is_start);
+        }
+    }
+}
