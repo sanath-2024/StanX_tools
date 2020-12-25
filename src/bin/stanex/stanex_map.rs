@@ -62,10 +62,10 @@ pub fn map(
     let output_path;
     if output_should_be_json {
         output_path =
-            PathFile::create(result_dir_path.concat("te_mapper_output.tsv").unwrap()).unwrap();
+            PathFile::create(result_dir_path.concat("te_mapper_output.json").unwrap()).unwrap();
     } else {
         output_path =
-            PathFile::create(result_dir_path.concat("te_mapper_output.json").unwrap()).unwrap();
+            PathFile::create(result_dir_path.concat("te_mapper_output.tsv").unwrap()).unwrap();
     }
 
     // Drosophila Melanogaster has these 7 chromosomes (change them for a different organism)

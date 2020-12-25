@@ -51,9 +51,9 @@ pub fn select_alignments(
     let mut final_output_writer = BufWriter::new(File::create(&tsv_output_path).unwrap());
     // first, write the TSV header if necessary
     if output_should_be_json {
-        final_output_writer.write("Chromosome\tTSD Upstream\tTSD Downstream\tOrientation\tName\t# Upstream Reads\t# Downstream Reads\tFound in Reference?\n".as_bytes()).unwrap();
-    } else {
         final_output_writer.write("[\n".as_bytes()).unwrap();
+    } else {
+        final_output_writer.write("Chromosome\tTSD Upstream\tTSD Downstream\tOrientation\tName\t# Upstream Reads\t# Downstream Reads\tFound in Reference?\n".as_bytes()).unwrap();
     }
 
     // then, write all the insertions
@@ -90,6 +90,7 @@ pub fn select_alignments(
                     )
                     .unwrap();
             }
+            final_output_writer.write("]\n".as_bytes()).unwrap();
         } else {
             for insertion in non_ref_insertions {
                 final_output_writer
