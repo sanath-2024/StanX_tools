@@ -11,6 +11,7 @@ pub fn map(
     result_dir: &str,
     bwa_threads: u16,
     mapper_threads: i32,
+    output_should_be_json: bool,
 ) {
     // create the result directory if it's not already there
     match PathDir::create(result_dir) {
@@ -58,8 +59,14 @@ pub fn map(
     println!("\n\nPHASE 4\n");
     let genome_aligned_path = PathFile::new(genome_aligned_name).unwrap();
 
-    let tsv_output_path =
-        PathFile::create(result_dir_path.concat("te_mapper_output.tsv").unwrap()).unwrap();
+    let output_path;
+    if output_should_be_json {
+        output_path =
+            PathFile::create(result_dir_path.concat("te_mapper_output.tsv").unwrap()).unwrap();
+    } else {
+        output_path =
+            PathFile::create(result_dir_path.concat("te_mapper_output.json").unwrap()).unwrap();
+    }
 
     // Drosophila Melanogaster has these 7 chromosomes (change them for a different organism)
     let chroms = vec![
@@ -84,8 +91,9 @@ pub fn map(
         0.1,
         1.5,
         &genome_aligned_path,
-        &tsv_output_path,
+        &output_path,
         &transposons_map,
+        output_should_be_json,
     );
     println!("\n\nTE mapping done\n");
 }

@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use std::cmp::{Ordering, Reverse};
 use std::collections::{BinaryHeap, HashMap};
 use std::fmt;
@@ -159,7 +161,7 @@ impl Ord for GenomeAlignment {
 
 // I could store orientation in a bool
 // but this is more readable
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
 enum Orientation {
     PlusPlus,
     PlusMinus,
@@ -174,7 +176,7 @@ enum Orientation {
 // because of the target site duplication
 // upstream_pos is the last M (match to genome) in an MS match
 // downstream_pos is the first M (match to genome) in a SM match
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct NonRefTE {
     name: String,
     chrom: String,
@@ -191,7 +193,7 @@ pub struct NonRefTE {
 // upstream_pos is the final nucleotide which matches the genome on the 5' end (relative to the genome) of the insertion
 // downstream_pos is the first nucleotide which matches the genome on the 3' end (relative to the genome) of the insertion
 // Notes: upstream_pos should be less than downstream_pos if it's reference
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RefTE {
     name: String,
     chrom: String,

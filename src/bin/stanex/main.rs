@@ -59,6 +59,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     if let Some(matches) = app_matches.subcommand_matches("map") {
         let reference = matches.value_of("Reference").unwrap();
         let paired_ends = matches.is_present("Paired-Ends");
+        let json_output = matches.is_present("JSON");
         let transposons = matches.value_of("Transposons File").unwrap();
         let result_dir = matches.value_of("Result Directory").unwrap();
         let bwa_threads = match matches.value_of("BWA Threads") {
@@ -86,6 +87,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 result_dir,
                 bwa_threads,
                 mapper_threads,
+                json_output,
             );
         } else {
             let reads = match matches.value_of("Reads") {
@@ -103,6 +105,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 result_dir,
                 bwa_threads,
                 mapper_threads,
+                json_output,
             );
         }
     }

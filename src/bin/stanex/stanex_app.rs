@@ -110,6 +110,14 @@ fn mapper_sc() -> App<'static, 'static> {
                 
         )
         .arg(
+            Arg::with_name("JSON")
+                .short("j")
+                .long("json")
+                .takes_value(false)
+                .help("use this argument if you want results to be printed in JSON (useful when passing output as input to other programs, or just for convenience)")
+                .required(false),
+        )
+        .arg(
             Arg::with_name("Reads")
                 .long("reads")
                 .takes_value(true)
