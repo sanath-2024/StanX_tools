@@ -77,16 +77,28 @@ pub fn select_alignments(
             for insertion in non_ref_insertions {
                 final_output_writer
                     .write(
-                        format!("{}\n", serde_json::to_string_pretty(&insertion).unwrap())
+                        format!("{},\n", serde_json::to_string_pretty(&insertion).unwrap())
                             .as_bytes(),
                     )
                     .unwrap();
             }
-            for insertion in ref_insertions {
+            for insertion in &ref_insertions[..ref_insertions.len() - 1] {
                 final_output_writer
                     .write(
-                        format!("{}\n", serde_json::to_string_pretty(&insertion).unwrap())
+                        format!("{},\n", serde_json::to_string_pretty(&insertion).unwrap())
                             .as_bytes(),
+                    )
+                    .unwrap();
+            }
+            if ref_insertions.len() >= 1 {
+                final_output_writer
+                    .write(
+                        format!(
+                            "{}\n",
+                            serde_json::to_string_pretty(&ref_insertions[ref_insertions.len() - 1])
+                                .unwrap()
+                        )
+                        .as_bytes(),
                     )
                     .unwrap();
             }
