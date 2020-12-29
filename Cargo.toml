@@ -1,6 +1,6 @@
 [package]
 name = "stanex_tools"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Sanath Govindarajan"]
 edition = "2018"
 
