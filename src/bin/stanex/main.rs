@@ -1,8 +1,10 @@
+mod regexes;
 mod sg_utils;
 mod stanex_app;
 mod stanex_download;
 mod stanex_map;
 mod stanex_variants;
+mod tabular;
 mod te_mapper_utils;
 mod utils;
 

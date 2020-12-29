@@ -7,7 +7,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::sync::{Arc, Mutex};
 
-use super::preprocess_select_reads::{create_transposon, TeAlignment};
+use super::first_sam_file;
 
 pub fn select_reads(
     te_aligned_path: &PathFile,
@@ -29,36 +29,21 @@ pub fn select_reads(
     // don't store lines in an intermediate data structure because that wastes memory
     // store the line number in a mutex for later use
     let line_num_arc = Arc::new(Mutex::new(0));
-    let line_num_arc_clone_main = Arc::clone(&line_num_arc);
-    let mut line_num_main = line_num_arc_clone_main.lock().unwrap();
-    let mut te_aligned_read;
 
     // first, get rid of comments (comments in the SAM file start with "@SQ")
     // and ignore the last comment line (starts with "@PG")
-    let mut transposons: HashMap<String, u64> = HashMap::new();
-    // need to make a clone in order to return it at the end of the function
-    let mut transposons_clone: HashMap<String, u64> = HashMap::new();
-    loop {
-        te_aligned_read = String::new();
-        te_aligned_reader_main
-            .read_line(&mut te_aligned_read)
-            .unwrap();
-        *line_num_main += 1;
-        if te_aligned_read.chars().nth(1).unwrap() == 'P' {
-            break;
-        } else {
-            create_transposon(&te_aligned_read, &mut transposons);
-            create_transposon(&te_aligned_read, &mut transposons_clone);
-        }
-    }
+    // make a clone because transposons will be put into an Arc and cannot be returned
+    let transposons = first_sam_file::read_all_tes_into_map(&mut te_aligned_reader_main);
+    *te_aligned_reader_main =
+        BufReader::with_capacity(65536, File::open(&te_aligned_path).unwrap());
+    let transposons_clone = first_sam_file::read_all_tes_into_map(&mut te_aligned_reader_main);
 
     // next, process the normal reads
 
     // unlock the mutexes
     std::mem::drop(te_aligned_reader_main);
-    std::mem::drop(line_num_main);
 
-    // let transposons be borrowed
+    // let transposons be borrowed by other threads
     let transposons_arc = Arc::new(transposons);
 
     // create a threadpool with num_threads workers
@@ -103,11 +88,11 @@ pub fn select_reads(
                 // Some is only returned for split reads
                 // TeAlignment's are automatically formatted in fasta format
                 // with all the required info
-                match TeAlignment::create(te_alignment_read, &transposons_arc_clone) {
-                    None => {
+                match first_sam_file::read_te_alignment(te_alignment_read, &transposons_arc_clone) {
+                    Err(_) => {
                         continue;
                     }
-                    Some(alignment) => {
+                    Ok(alignment) => {
                         let mut selected_reads_writer_child =
                             selected_reads_writer_arc_clone.lock().unwrap();
                         selected_reads_writer_child

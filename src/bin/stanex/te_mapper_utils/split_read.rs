@@ -45,23 +45,11 @@
 // and which end of the transposon it aligned to (start or end)
 // where "start" is the 5' end and "end" is the 3' end
 
-use lazy_static::lazy_static;
-use regex::Regex;
-
-// lazy static regexes to avoid multiple compilations
-lazy_static! {
-    static ref SM_REGEX: Regex = Regex::new(r"^(\d+)S(\d+)M$").unwrap();
-    static ref MS_REGEX: Regex = Regex::new(r"^(\d+)M(\d+)S$").unwrap();
-    static ref HM_REGEX: Regex = Regex::new(r"^(\d+)H(\d+)M$").unwrap();
-    static ref MH_REGEX: Regex = Regex::new(r"^(\d+)M(\d+)H$").unwrap();
-    static ref M_REGEX: Regex = Regex::new(r"^\d+M$").unwrap();
-}
-
 #[derive(Debug)]
 pub struct SMAlignment {
     pub s: u64,
     pub m: u64,
-    pos: u64,
+    pub pos: u64,
 }
 
 impl SMAlignment {
@@ -79,7 +67,7 @@ impl SMAlignment {
 pub struct MSAlignment {
     pub m: u64,
     pub s: u64,
-    pos: u64,
+    pub pos: u64,
 }
 
 impl MSAlignment {
@@ -99,11 +87,11 @@ pub struct MAlignment {
     pub old_s: u64,
     pub old_m: u64,
     // is the TE alignment at the start of the transposon, or the end?
-    is_start: bool,
+    pub is_start: bool,
     // is the genome alignment +/+? tells us the orientation of the insertion
-    new_plus: bool,
+    pub new_plus: bool,
     // the position of the genome alignment
-    new_pos: u64,
+    pub new_pos: u64,
 }
 
 impl MAlignment {
@@ -124,117 +112,6 @@ impl MAlignment {
             } else {
                 return self.new_pos + self.old_s;
             }
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum SplitReadTE {
-    SM(SMAlignment),
-    MS(MSAlignment),
-}
-
-// in SplitReadGenome, we parse H as if it were S
-#[derive(Debug)]
-pub enum SplitReadGenome {
-    SM(SMAlignment),
-    MS(MSAlignment),
-    M(MAlignment),
-}
-
-// get a numeric capture from a regex less verbosely
-// steps:
-// 1. unwrap the capture (assume that it exists)
-// 2. get the Match object of the capture in position "which"
-// 3. unwrap (assume that it exists, since the Regex has already been checked)
-// 4. turn the Match into an &str
-// 5. parse out the u64
-// 6. unwrap (assume that it is a number, which we know because of the Regex itself)
-fn get_capture<'t>(captures: Option<regex::Captures<'t>>, which: usize) -> u64 {
-    captures
-        .unwrap()
-        .get(which)
-        .unwrap()
-        .as_str()
-        .parse()
-        .unwrap()
-}
-
-impl SplitReadTE {
-    pub fn parse(cigar: String, pos: u64) -> Option<SplitReadTE> {
-        if SM_REGEX.is_match(&cigar[..]) {
-            let s: u64 = get_capture(SM_REGEX.captures(&cigar[..]), 1);
-            let m: u64 = get_capture(SM_REGEX.captures(&cigar[..]), 2);
-            Some(SplitReadTE::SM(SMAlignment {
-                s: s,
-                m: m,
-                pos: pos,
-            }))
-        } else if MS_REGEX.is_match(&cigar[..]) {
-            let m: u64 = get_capture(MS_REGEX.captures(&cigar[..]), 1);
-            let s: u64 = get_capture(MS_REGEX.captures(&cigar[..]), 2);
-            Some(SplitReadTE::MS(MSAlignment {
-                m: m,
-                s: s,
-                pos: pos,
-            }))
-        } else {
-            None
-        }
-    }
-}
-
-impl SplitReadGenome {
-    pub fn parse(
-        cigar: String,
-        old_s: u64,
-        old_m: u64,
-        is_start: bool,
-        new_plus: bool,
-        pos: u64,
-    ) -> Option<SplitReadGenome> {
-        if HM_REGEX.is_match(&cigar[..]) {
-            let h: u64 = get_capture(HM_REGEX.captures(&cigar[..]), 1);
-            let m: u64 = get_capture(HM_REGEX.captures(&cigar[..]), 2);
-            Some(SplitReadGenome::SM(SMAlignment {
-                s: h,
-                m: m,
-                pos: pos,
-            }))
-        } else if MH_REGEX.is_match(&cigar[..]) {
-            let m: u64 = get_capture(MH_REGEX.captures(&cigar[..]), 1);
-            let h: u64 = get_capture(MH_REGEX.captures(&cigar[..]), 2);
-            Some(SplitReadGenome::MS(MSAlignment {
-                m: m,
-                s: h,
-                pos: pos,
-            }))
-        } else if SM_REGEX.is_match(&cigar[..]) {
-            let s: u64 = get_capture(SM_REGEX.captures(&cigar[..]), 1);
-            let m: u64 = get_capture(SM_REGEX.captures(&cigar[..]), 2);
-            Some(SplitReadGenome::SM(SMAlignment {
-                s: s,
-                m: m,
-                pos: pos,
-            }))
-        } else if MS_REGEX.is_match(&cigar[..]) {
-            let m: u64 = get_capture(MS_REGEX.captures(&cigar[..]), 1);
-            let s: u64 = get_capture(MS_REGEX.captures(&cigar[..]), 2);
-            Some(SplitReadGenome::MS(MSAlignment {
-                m: m,
-                s: s,
-                pos: pos,
-            }))
-        } else if M_REGEX.is_match(&cigar[..]) {
-            Some(SplitReadGenome::M(MAlignment {
-                old_s: old_s,
-                old_m: old_m,
-                is_start: is_start,
-                new_plus: new_plus,
-                new_pos: pos,
-            }))
-        } else {
-            None
         }
     }
 }
