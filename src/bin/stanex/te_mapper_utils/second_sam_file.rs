@@ -62,57 +62,10 @@ pub fn read_genome_alignment(
     return GenomeAlignment::create(genome_alignment_data, te_alignment_data, chroms);
 }
 
-/*
 pub fn read_all_alignments_into_bin_heaps(
     reader: &mut BufReader<File>,
     chroms: &Vec<String>,
 ) -> HashMap<String, (BinaryHeap<GenomeAlignment>, BinaryHeap<GenomeAlignment>)> {
-    // OLD ALGORITHM - O(n log n)
-
-    // return a map between chromosomes and their non-ref alignments and ref alignments
-    let mut sorted_result: HashMap<
-        String,
-        (BinaryHeap<GenomeAlignment>, BinaryHeap<GenomeAlignment>),
-    > = HashMap::new();
-
-    for chrom in chroms {
-        sorted_result.insert(chrom.clone(), (BinaryHeap::new(), BinaryHeap::new()));
-    }
-
-    // read in all alignments into sorted result
-    let mut genome_aligned_read;
-
-    loop {
-        genome_aligned_read = String::new();
-        match reader.read_line(&mut genome_aligned_read) {
-            Err(_) => panic!("Something went wrong - unable to read file"),
-            Ok(0) => break,
-            Ok(_) => (),
-        }
-        if let Ok((chrom, alignment)) = read_genome_alignment(genome_aligned_read, chroms) {
-            match alignment.split_read_genome {
-                // ref
-                SplitReadGenome::M(_) => {
-                    sorted_result.get_mut(&chrom).unwrap().1.push(alignment);
-                }
-                // non-ref
-                _ => {
-                    sorted_result.get_mut(&chrom).unwrap().0.push(alignment);
-                }
-            }
-        }
-    }
-
-    return sorted_result;
-}
-*/
-
-pub fn read_all_alignments_into_bin_heaps(
-    reader: &mut BufReader<File>,
-    chroms: &Vec<String>,
-) -> HashMap<String, (BinaryHeap<GenomeAlignment>, BinaryHeap<GenomeAlignment>)> {
-    // NEW ALGORITHM - O(n) - PRODUCES SLIGHTLY DIFFERENT RESULTS
-
     // return a map between chromosomes and their non-ref alignments and ref alignments
     let mut sorted_result: HashMap<
         String,
@@ -124,9 +77,7 @@ pub fn read_all_alignments_into_bin_heaps(
         HashMap::new();
 
     for chrom in chroms {
-        let unsorted_nonref: Vec<GenomeAlignment> = Vec::new();
-        let unsorted_ref: Vec<GenomeAlignment> = Vec::new();
-        unsorted_result.insert(chrom.clone(), (unsorted_nonref, unsorted_ref));
+        unsorted_result.insert(chrom.clone(), (Vec::new(), Vec::new()));
     }
 
     // read in all alignments into unsorted result

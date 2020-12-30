@@ -22,6 +22,13 @@ mod split_read_genome {
 
     // in SplitReadGenome, we parse H as if it were S
     impl SplitReadGenome {
+        pub fn pos(&self) -> u64 {
+            match self {
+                SplitReadGenome::SM(sm_alignment) => sm_alignment.pos,
+                SplitReadGenome::MS(ms_alignment) => ms_alignment.pos,
+                SplitReadGenome::M(m_alignment) => m_alignment.new_pos,
+            }
+        }
         pub fn parse(
             cigar: String,
             old_m: u64,
@@ -223,8 +230,18 @@ impl PartialOrd for GenomeAlignment {
 // so reverse it while comparing
 impl Ord for GenomeAlignment {
     fn cmp(&self, other: &Self) -> Ordering {
-        Reverse((&self.te_name, self.get_boundary_nt()))
-            .cmp(&Reverse((&other.te_name, other.get_boundary_nt())))
+        Reverse((
+            &self.te_name,
+            self.get_boundary_nt(),
+            self.split_read_genome.pos(),
+            self.old_m,
+        ))
+        .cmp(&Reverse((
+            &other.te_name,
+            other.get_boundary_nt(),
+            other.split_read_genome.pos(),
+            other.old_m,
+        )))
     }
 }
 
