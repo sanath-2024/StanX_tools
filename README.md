@@ -1,21 +1,21 @@
-# stanex_tools
+# Stan-X Tools
 Various tools associated with mapping transposons (originated as part of the StanEx project)
 
 As of December 2020, a transposable element mapper, variant caller, synthetic reference genome generator, and download helper are provided.
 
-These tools are subcommands of the main "stanex" command. For example:
+These tools are subcommands of the main "sx" command. For example:
 
 ```bash
-stanex map [ARGS]
-stanex variants [ARGS]
-stanex sg [ARGS]
-stanex download [ARGS]
+sx map [ARGS]
+sx variants [ARGS]
+sx sg [ARGS]
+sx download [ARGS]
 ```
 
 Use the `--help` argument for more information on the different subcommands and arguments:
 
 ```bash
-stanex --help
+sx --help
 ```
 
 Note: the TE mapper uses an algorithm that is based on Bergman Lab's `ngs_te_mapper` tool, written by Raquel S. Linheiro, Michael G. Nelson, and Casey M. Bergman.

@@ -204,11 +204,11 @@ fn sg_sc() -> App<'static, 'static> {
 
 // the entire CLI app
 pub fn app() -> App<'static, 'static> {
-    App::new("StanEx Tools")
+    App::new("Stan-X Tools")
         .author("Sanath Govindarajan")
-        .version("0.1")
+        .version("1.0")
         .about(
-            "Miscellaneous tools used for Whole-Genome Sequencing analysis in the StanEx project",
+            "Miscellaneous tools used for Whole-Genome Sequencing analysis in the Stan-X project",
         )
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .subcommands(vec![download_sc(), variants_sc(), mapper_sc(), sg_sc()])

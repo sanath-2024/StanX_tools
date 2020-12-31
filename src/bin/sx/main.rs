@@ -1,9 +1,9 @@
 mod regexes;
 mod sg_utils;
-mod stanex_app;
-mod stanex_download;
-mod stanex_map;
-mod stanex_variants;
+mod sx_app;
+mod sx_download;
+mod sx_map;
+mod sx_variants;
 mod tabular;
 mod te_mapper_utils;
 mod utils;
@@ -13,14 +13,14 @@ use std::error::Error;
 use crate::utils::Reads;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let app = stanex_app::app();
+    let app = sx_app::app();
     let app_matches = app.get_matches();
 
     // handle "download" subcommand
     if let Some(matches) = app_matches.subcommand_matches("download") {
         let url_arg = matches.value_of("URL").unwrap();
         let output_arg = matches.value_of("Output File").unwrap();
-        stanex_download::download(url_arg, output_arg);
+        sx_download::download(url_arg, output_arg);
     }
 
     // handle "variants" subcommand
@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let reads1 = matches.value_of("Reads1").unwrap();
             let reads2 = matches.value_of("Reads2").unwrap();
             let reads_struct = Reads::PairedEnds(reads1.to_owned(), reads2.to_owned());
-            stanex_variants::run_variant_calling_pipeline(
+            sx_variants::run_variant_calling_pipeline(
                 reference,
                 reads_struct,
                 result_dir,
@@ -48,7 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         } else {
             let reads = matches.value_of("Reads").unwrap();
             let reads_struct = Reads::SingleEnd(reads.to_owned());
-            stanex_variants::run_variant_calling_pipeline(
+            sx_variants::run_variant_calling_pipeline(
                 reference,
                 reads_struct,
                 result_dir,
@@ -82,7 +82,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let reads1 = matches.value_of("Reads1").unwrap();
             let reads2 = matches.value_of("Reads2").unwrap();
             let reads_struct = Reads::PairedEnds(reads1.to_owned(), reads2.to_owned());
-            stanex_map::map(
+            sx_map::map(
                 reference,
                 &reads_struct,
                 transposons,
@@ -100,7 +100,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 }
             };
             let reads_struct = Reads::SingleEnd(reads.to_owned());
-            stanex_map::map(
+            sx_map::map(
                 reference,
                 &reads_struct,
                 transposons,
