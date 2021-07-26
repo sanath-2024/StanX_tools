@@ -4,7 +4,7 @@ use std::fmt::{Display, Formatter, Result};
 
 // I could store orientation in a bool
 // but this is more readable
-#[derive(Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Serialize, Deserialize, Clone)]
 pub enum Orientation {
     PlusPlus,
     PlusMinus,

@@ -90,13 +90,13 @@ pub use split_read_genome::SplitReadGenome;
 // (including the previous info from the TE alignment)
 #[derive(Debug)]
 pub struct GenomeAlignment {
-    te_name: String,
-    old_m: u64,
-    old_s: u64,
-    is_sm_te: bool,
-    is_start: bool,
-    new_plus: bool,
-    chrom: String,
+    pub te_name: String,
+    pub old_m: u64,
+    pub old_s: u64,
+    pub is_sm_te: bool,
+    pub is_start: bool,
+    pub new_plus: bool,
+    pub chrom: String,
     pub split_read_genome: SplitReadGenome,
 }
 
@@ -189,7 +189,7 @@ impl GenomeAlignment {
     // right next to the transposon
     // this must be in a one-indexed coordinate system
     // (coordinate conversions happen in a later step)
-    fn get_boundary_nt(&self) -> u64 {
+    pub fn get_boundary_nt(&self) -> u64 {
         match &self.split_read_genome {
             // the upstream end of the insertion (non-reference)
             SplitReadGenome::MS(alignment) => alignment.get_last_m(),

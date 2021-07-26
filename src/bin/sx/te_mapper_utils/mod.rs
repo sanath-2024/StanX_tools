@@ -1,5 +1,6 @@
 mod first_sam_file;
 mod genome_alignment;
+mod new_algo;
 mod output_data_types;
 mod second_sam_file;
 pub mod select_alignments;
