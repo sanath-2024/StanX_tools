@@ -123,7 +123,8 @@ mod tests {
     use super::super::{first_sam_file, genome_alignment::GenomeAlignment};
     use super::*;
 
-    // #[test]
+    #[test]
+    #[ignore]
     fn test_insertion_creation() {
         let mut first_sam_file_reader = BufReader::new(File::open("test/te_aligned.sam").unwrap());
         let transposons_map = first_sam_file::read_all_tes_into_map(&mut first_sam_file_reader);

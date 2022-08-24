@@ -82,7 +82,8 @@ mod tests {
     use std::fs::File;
     use std::io::BufReader;
 
-    // #[test]
+    #[test]
+    #[ignore]
     fn test_cigar_string_parsing() {
         // test the creation of, m_size, s_size, is_sm, and is_start
 

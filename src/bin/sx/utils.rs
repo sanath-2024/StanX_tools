@@ -11,7 +11,7 @@ pub fn absolute_filepath_checked(relative: &str) -> PathFile {
         Ok(absolute) => absolute,
         Err(x) => {
             eprintln!("File does not exist: {}", relative);
-            panic!(x);
+            panic!("{}", x);
         }
     }
 }
@@ -23,7 +23,7 @@ pub fn absolute_filepath_unchecked(relative: &str) -> PathFile {
         Ok(absolute) => absolute,
         Err(x) => {
             eprintln!("An error occurred creating the file: {}", relative);
-            panic!(x);
+            panic!("{}", x);
         }
     }
 }

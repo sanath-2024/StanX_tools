@@ -16,16 +16,16 @@ pub fn map(
     // create the result directory if it's not already there
     match PathDir::create(result_dir) {
         Ok(_) => (),
-        Err(e) => panic!(format!("Unable to create result directory: {}", e)),
+        Err(e) => panic!("Unable to create result directory: {}", e),
     };
     // make sure that the reference and transposons files are present
     match PathFile::new(ref_name) {
         Ok(_) => (),
-        Err(e) => panic!(format!("Reference genome not present: {}", e)),
+        Err(e) => panic!("Reference genome not present: {}", e),
     };
     match PathFile::new(transposons_name) {
         Ok(_) => (),
-        Err(e) => panic!(format!("Transposons file not present: {}", e)),
+        Err(e) => panic!("Transposons file not present: {}", e),
     };
     // index the transposons file and reference sequence if necessary
     utils::bwa_index_if_required(transposons_name);

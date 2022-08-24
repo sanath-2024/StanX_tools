@@ -151,10 +151,10 @@ impl GenomeAlignment {
                     "end"
                 }
             };
-            panic!(format!(
+            panic!(
                 "TE mapper error: TE alignment was {} and aligned to the {} of the transposon",
                 sm_str, start_str
-            ));
+            );
         }
 
         let flag = genome_alignment_data.get("FLAG")?;
