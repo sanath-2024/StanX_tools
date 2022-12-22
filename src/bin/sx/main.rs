@@ -71,13 +71,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .expect("Please enter a positive number of BWA threads or omit the argument"),
             None => 8,
         };
-        let mapper_threads = match matches.value_of("TE Mapper Threads") {
-            Some(num) => num
-                .to_owned()
-                .parse::<i32>()
-                .expect("Please enter a valid number of TE mapper threads or omit the argument; any number less than 0 will switch to the default number of threads: 8"),
-            None => -1,
-        };
         if paired_ends {
             let reads1 = matches.value_of("Reads1").unwrap();
             let reads2 = matches.value_of("Reads2").unwrap();
@@ -88,7 +81,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                 transposons,
                 result_dir,
                 bwa_threads,
-                mapper_threads,
                 json_output,
             );
         } else {
@@ -106,7 +98,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                 transposons,
                 result_dir,
                 bwa_threads,
-                mapper_threads,
                 json_output,
             );
         }

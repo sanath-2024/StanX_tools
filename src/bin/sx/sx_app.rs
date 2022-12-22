@@ -163,14 +163,6 @@ fn mapper_sc() -> App<'static, 'static> {
                 .help("the number of threads to run BWA with (default value 8; choose 1 if you want a deterministic output; choose higher numbers to run faster while taking up more memory)")
                 .required(false),
         )
-        .arg(
-            Arg::with_name("TE Mapper Threads")
-                .long("mapper-threads")
-                .takes_value(true)
-                .value_name("NUM_THREADS")
-                .help("the number of threads to run the TE mapper with (default value 8; choose 1 if you want intermediate files to be deterministic; choose higher numbers to run faster while taking up more memory; output file is deterministic either way)")
-                .required(false),
-        )
 }
 
 // the sg (synthetic genome) subcommand

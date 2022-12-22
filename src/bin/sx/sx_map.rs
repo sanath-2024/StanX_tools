@@ -10,7 +10,6 @@ pub fn map(
     transposons_name: &str,
     result_dir: &str,
     bwa_threads: u16,
-    mapper_threads: i32,
     output_should_be_json: bool,
 ) {
     // create the result directory if it's not already there
@@ -41,8 +40,7 @@ pub fn map(
     let result_dir_path = PathDir::new(result_dir).unwrap();
     let selected_reads_path =
         PathFile::create(result_dir_path.concat("selected_reads.fasta").unwrap()).unwrap();
-    let transposons_map =
-        select_reads::select_reads(&te_aligned_path, &selected_reads_path, mapper_threads);
+    let transposons_map = select_reads::select_reads(&te_aligned_path, &selected_reads_path);
     // phase 3: align the potential split-reads to the genome and make sure that
     // the other half of the split-read is a perfect match as well
     println!("\n\nPHASE 3\n");
