@@ -171,7 +171,8 @@ impl GenomeAlignment {
     }
 
     // get the position of the boundary nucleotide in the genome
-    // right next to the transposon
+    // right next to the transposon (if it's a non-reference insertion)
+    // or the first nucleotide in the transposon itself (if it's a reference insertion)
     // this must be in a one-indexed coordinate system
     // (coordinate conversions happen in a later step)
     pub fn get_boundary_nt(&self) -> u64 {
