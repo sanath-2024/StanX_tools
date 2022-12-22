@@ -172,3 +172,9 @@ impl Display for RefTE {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct OutputInsertions {
+    pub non_reference: Vec<NonRefTE>,
+    pub reference: Vec<RefTE>,
+}

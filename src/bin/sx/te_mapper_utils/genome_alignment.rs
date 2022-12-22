@@ -40,41 +40,25 @@ mod split_read_genome {
             if regexes::HM_REGEX.is_match(&cigar[..]) {
                 let h: u64 = regexes::get_capture(regexes::HM_REGEX.captures(&cigar[..]), 1);
                 let m: u64 = regexes::get_capture(regexes::HM_REGEX.captures(&cigar[..]), 2);
-                Ok(SplitReadGenome::SM(SMAlignment {
-                    s: h,
-                    m: m,
-                    pos: pos,
-                }))
+                Ok(SplitReadGenome::SM(SMAlignment { s: h, m, pos }))
             } else if regexes::MH_REGEX.is_match(&cigar[..]) {
                 let m: u64 = regexes::get_capture(regexes::MH_REGEX.captures(&cigar[..]), 1);
                 let h: u64 = regexes::get_capture(regexes::MH_REGEX.captures(&cigar[..]), 2);
-                Ok(SplitReadGenome::MS(MSAlignment {
-                    m: m,
-                    s: h,
-                    pos: pos,
-                }))
+                Ok(SplitReadGenome::MS(MSAlignment { m, s: h, pos }))
             } else if regexes::SM_REGEX.is_match(&cigar[..]) {
                 let s: u64 = regexes::get_capture(regexes::SM_REGEX.captures(&cigar[..]), 1);
                 let m: u64 = regexes::get_capture(regexes::SM_REGEX.captures(&cigar[..]), 2);
-                Ok(SplitReadGenome::SM(SMAlignment {
-                    s: s,
-                    m: m,
-                    pos: pos,
-                }))
+                Ok(SplitReadGenome::SM(SMAlignment { s, m, pos }))
             } else if regexes::MS_REGEX.is_match(&cigar[..]) {
                 let m: u64 = regexes::get_capture(regexes::MS_REGEX.captures(&cigar[..]), 1);
                 let s: u64 = regexes::get_capture(regexes::MS_REGEX.captures(&cigar[..]), 2);
-                Ok(SplitReadGenome::MS(MSAlignment {
-                    m: m,
-                    s: s,
-                    pos: pos,
-                }))
+                Ok(SplitReadGenome::MS(MSAlignment { m, s, pos }))
             } else if regexes::M_REGEX.is_match(&cigar[..]) {
                 Ok(SplitReadGenome::M(MAlignment {
-                    old_s: old_s,
-                    old_m: old_m,
-                    is_start: is_start,
-                    new_plus: new_plus,
+                    old_s,
+                    old_m,
+                    is_start,
+                    new_plus,
                     new_pos: pos,
                 }))
             } else {
@@ -166,21 +150,22 @@ impl GenomeAlignment {
             bail!("invalid chromosome");
         }
 
-        let is_plus = GenomeAlignment::is_plus(flag);
+        let new_plus = GenomeAlignment::is_plus(flag);
 
-        let split_read = SplitReadGenome::parse(cigar_str, old_m, old_s, is_start, is_plus, pos)?;
+        let split_read_genome =
+            SplitReadGenome::parse(cigar_str, old_m, old_s, is_start, new_plus, pos)?;
 
         Ok((
             chrom.clone(),
             GenomeAlignment {
-                te_name: te_name,
-                old_m: old_m,
-                old_s: old_s,
-                is_sm_te: is_sm_te,
-                is_start: is_start,
-                new_plus: is_plus,
-                chrom: chrom,
-                split_read_genome: split_read,
+                te_name,
+                old_m,
+                old_s,
+                is_sm_te,
+                is_start,
+                new_plus,
+                chrom,
+                split_read_genome,
             },
         ))
     }

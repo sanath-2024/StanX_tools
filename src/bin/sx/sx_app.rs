@@ -118,6 +118,13 @@ fn mapper_sc() -> App<'static, 'static> {
                 .required(false),
         )
         .arg(
+            Arg::with_name("phase")
+            .long("phase")
+            .takes_value(true)
+            .help("the TE mapper phase to start on (default: 1)")
+            .required(false)
+        )
+        .arg(
             Arg::with_name("Reads")
                 .long("reads")
                 .takes_value(true)

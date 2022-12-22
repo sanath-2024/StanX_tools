@@ -11,6 +11,7 @@ use super::first_sam_file;
 pub fn select_reads(
     te_aligned_path: &PathFile,
     selected_reads_path: &PathFile,
+    only_create_transposon_map: bool,
 ) -> HashMap<String, u64> {
     // select split-reads from TE alignment
     let mut te_aligned_reader =
@@ -29,6 +30,11 @@ pub fn select_reads(
     // and ignore the last comment line (starts with "@PG")
     // make a clone because transposons will be put into an Arc and cannot be returned
     let transposons = first_sam_file::read_all_tes_into_map(&mut te_aligned_reader);
+
+    if only_create_transposon_map {
+        return transposons;
+    }
+
     let transposons_clone = transposons.clone();
 
     // next, process the normal reads

@@ -64,6 +64,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         let json_output = matches.is_present("JSON");
         let transposons = matches.value_of("Transposons File").unwrap();
         let result_dir = matches.value_of("Result Directory").unwrap();
+        let phase = matches
+            .value_of("phase")
+            .unwrap_or("1")
+            .parse::<u32>()
+            .expect("Please enter a positive phase or omit the argument");
         let bwa_threads = match matches.value_of("BWA Threads") {
             Some(num) => num
                 .to_owned()
@@ -82,6 +87,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 result_dir,
                 bwa_threads,
                 json_output,
+                phase,
             );
         } else {
             let reads = match matches.value_of("Reads") {
@@ -99,6 +105,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 result_dir,
                 bwa_threads,
                 json_output,
+                phase,
             );
         }
     }
