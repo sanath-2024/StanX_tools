@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use std::fmt::{Display, Formatter, Result};
 
+use super::genome_alignment::SplitReadRanges;
+
 // I could store orientation in a bool
 // but this is more readable
 #[derive(Eq, PartialEq, Debug, Serialize, Deserialize, Clone)]
@@ -42,8 +44,8 @@ pub struct NonRefTE {
     pub upstream_pos: u64,
     pub downstream_pos: u64,
     pub orientation: Orientation,
-    pub num_upstream_reads: u64,
-    pub num_downstream_reads: u64,
+    pub upstream_reads: Vec<SplitReadRanges>,
+    pub downstream_reads: Vec<SplitReadRanges>,
 }
 
 impl NonRefTE {
@@ -81,8 +83,8 @@ impl Display for NonRefTE {
                 end_pos,
                 orientation_string,
                 self.name,
-                self.num_upstream_reads,
-                self.num_downstream_reads,
+                self.upstream_reads.len(),
+                self.downstream_reads.len(),
                 "non-reference",
             ),
             TSDCoords::ZeroBasedHalfOpen { start_pos, end_pos } => write!(
@@ -93,8 +95,8 @@ impl Display for NonRefTE {
                 end_pos,
                 orientation_string,
                 self.name,
-                self.num_upstream_reads,
-                self.num_downstream_reads,
+                self.upstream_reads.len(),
+                self.downstream_reads.len(),
                 "non-reference",
             ),
         }
