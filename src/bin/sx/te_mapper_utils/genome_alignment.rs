@@ -497,9 +497,9 @@ impl GenomeAlignment {
                                 chrom: chrom_name.clone(),
                                 upstream_pos: alignment.get_boundary_nt(),
                                 downstream_pos: std::u64::MAX / 2,
-                                orientation: orientation,
-                                num_upstream_reads: 1,
-                                num_downstream_reads: 0,
+                                orientation,
+                                upstream_reads: vec![alignment.get_ranges()],
+                                downstream_reads: Vec::new(),
                             }),
                             // if there are TE's in the vector, match against the previous ones
                             Some(insertion) => {
@@ -507,7 +507,7 @@ impl GenomeAlignment {
                                     // we are still in the same insertion
                                     // only if the upstream position matches
                                     if position == insertion.upstream_pos {
-                                        insertion.num_upstream_reads += 1;
+                                        insertion.upstream_reads.push(alignment.get_ranges());
                                     }
                                     // we are in a new insertion
                                     else {
@@ -516,9 +516,9 @@ impl GenomeAlignment {
                                             chrom: chrom_name.clone(),
                                             upstream_pos: position,
                                             downstream_pos: std::u64::MAX / 2,
-                                            orientation: orientation,
-                                            num_upstream_reads: 1,
-                                            num_downstream_reads: 0,
+                                            orientation,
+                                            upstream_reads: vec![alignment.get_ranges()],
+                                            downstream_reads: Vec::new(),
                                         });
                                     }
                                 }
@@ -529,9 +529,9 @@ impl GenomeAlignment {
                                         chrom: chrom_name.clone(),
                                         upstream_pos: position,
                                         downstream_pos: std::u64::MAX / 2,
-                                        orientation: orientation,
-                                        num_upstream_reads: 1,
-                                        num_downstream_reads: 0,
+                                        orientation,
+                                        upstream_reads: vec![alignment.get_ranges()],
+                                        downstream_reads: Vec::new(),
                                     });
                                 }
                             }
@@ -546,9 +546,9 @@ impl GenomeAlignment {
                                 chrom: chrom_name.clone(),
                                 upstream_pos: std::u64::MAX / 2,
                                 downstream_pos: alignment.get_boundary_nt(),
-                                orientation: orientation,
-                                num_upstream_reads: 0,
-                                num_downstream_reads: 1,
+                                orientation,
+                                upstream_reads: Vec::new(),
+                                downstream_reads: vec![alignment.get_ranges()],
                             }),
                             // if there are TE's in the vector, match against the previous ones
                             Some(insertion) => {
@@ -557,7 +557,7 @@ impl GenomeAlignment {
                                     // if the downstream position matches
                                     // or it is between min_te_length and max_te_length after the upstream position
                                     if position == insertion.downstream_pos {
-                                        insertion.num_downstream_reads += 1;
+                                        insertion.downstream_reads.push(alignment.get_ranges());
                                     } else if position
                                         >= insertion.upstream_pos
                                             + ((min_te_length * cur_te_length) as u64)
@@ -566,7 +566,7 @@ impl GenomeAlignment {
                                                 + ((max_te_length * cur_te_length) as u64)
                                     {
                                         insertion.downstream_pos = position;
-                                        insertion.num_downstream_reads += 1;
+                                        insertion.downstream_reads.push(alignment.get_ranges());
                                     }
                                     // we are in a new insertion
                                     else {
@@ -575,9 +575,9 @@ impl GenomeAlignment {
                                             chrom: chrom_name.clone(),
                                             upstream_pos: std::u64::MAX / 2,
                                             downstream_pos: position,
-                                            orientation: orientation,
-                                            num_upstream_reads: 0,
-                                            num_downstream_reads: 1,
+                                            orientation,
+                                            upstream_reads: Vec::new(),
+                                            downstream_reads: vec![alignment.get_ranges()],
                                         });
                                     }
                                 }
@@ -588,9 +588,9 @@ impl GenomeAlignment {
                                         chrom: chrom_name.clone(),
                                         upstream_pos: std::u64::MAX / 2,
                                         downstream_pos: position,
-                                        orientation: orientation,
-                                        num_upstream_reads: 0,
-                                        num_downstream_reads: 1,
+                                        orientation,
+                                        upstream_reads: Vec::new(),
+                                        downstream_reads: vec![alignment.get_ranges()],
                                     });
                                 }
                             }
@@ -603,7 +603,7 @@ impl GenomeAlignment {
         // (can't use iterators because of borrowing)
         let mut filtered_tes: Vec<RefTE> = Vec::new();
         for insertion in tes {
-            if insertion.num_upstream_reads > 0 && insertion.num_downstream_reads > 0 {
+            if insertion.upstream_reads.len() > 0 && insertion.downstream_reads.len() > 0 {
                 filtered_tes.push(insertion);
             }
         }
