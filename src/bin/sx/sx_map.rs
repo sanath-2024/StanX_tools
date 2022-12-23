@@ -39,7 +39,6 @@ pub fn map(
     let te_aligned_name = format!("{}/te_aligned.sam", result_dir);
     let genome_aligned_name = format!("{}/genome_aligned.sam", result_dir);
     let result_dir_path = PathDir::new(result_dir).unwrap();
-    let te_aligned_path = PathFile::new(te_aligned_name.clone()).unwrap();
     let selected_reads_path =
         PathFile::create(result_dir_path.concat("selected_reads.fasta").unwrap()).unwrap();
 
@@ -50,6 +49,9 @@ pub fn map(
         println!("\n\nPHASE 1\n");
         utils::bwa_mem_align(transposons_name, reads, &te_aligned_name[..], bwa_threads);
     }
+
+    let te_aligned_path = PathFile::new(te_aligned_name.clone()).unwrap();
+
     // phase 2: look for split-reads (reads that go off one end of the transposon)
     // in order to be safe, only perfect matches are used
     if phase <= 2 {
