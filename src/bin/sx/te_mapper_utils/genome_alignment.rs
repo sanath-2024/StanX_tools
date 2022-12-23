@@ -208,7 +208,7 @@ impl GenomeAlignment {
                 genome_range: (alignment.s + 1, alignment.m + alignment.s),
             },
             SplitReadGenome::M(alignment) => {
-                if alignment.is_start {
+                if !(alignment.new_plus ^ alignment.is_start) {
                     SplitReadRanges {
                         genome_range: (1, alignment.old_s),
                         te_range: (alignment.old_s + 1, alignment.old_m + alignment.old_s),
